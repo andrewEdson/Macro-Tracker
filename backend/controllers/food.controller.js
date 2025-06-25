@@ -49,22 +49,64 @@ export const getFoodByName = async (req, res) => {
       return res.status(404).json({ message: "Food item not found" });
     }
 
-    // Get the first product from search results
-    const product = data.products[0];
-
-    // Create food object (but don't save to DB yet)
-    const foodData = {
-      name: product.product_name || name,
-      brand: product.brands || "",
-      servingSize: product.serving_size || "100g",
-      calories: product.nutriments?.energy_kcal_100g || 0,
-      protein: product.nutriments?.proteins_100g || 0,
-      carbs: product.nutriments?.carbohydrates_100g || 0,
-      fats: product.nutriments?.fat_100g || 0,
+    // Helper function to get nutrition value from multiple possible fields (same as barcode function)
+    const getNutrientValue = (nutriments, possibleKeys) => {
+      for (const key of possibleKeys) {
+        if (
+          nutriments &&
+          nutriments[key] !== undefined &&
+          nutriments[key] !== null
+        ) {
+          return parseFloat(nutriments[key]) || 0;
+        }
+      }
+      return 0;
     };
+
+    // Process up to 3 products to give users options
+    const foodOptions = data.products.slice(0, 3).map((product, index) => {
+      const nutriments = product.nutriments || {};
+
+      return {
+        id: index + 1,
+        name: product.product_name || `Unknown Product ${index + 1}`,
+        brand: product.brands || "Unknown Brand",
+        servingSize: product.serving_size || "100g",
+        calories: getNutrientValue(nutriments, [
+          "energy-kcal_100g",
+          "energy_kcal_100g",
+          "energy-kcal",
+          "energy_kcal",
+          "energy_100g",
+        ]),
+        protein: getNutrientValue(nutriments, [
+          "proteins_100g",
+          "proteins",
+          "protein_100g",
+          "protein",
+        ]),
+        carbs: getNutrientValue(nutriments, [
+          "carbohydrates_100g",
+          "carbohydrates",
+          "carbs_100g",
+          "carbs",
+        ]),
+        fats: getNutrientValue(nutriments, [
+          "fat_100g",
+          "fat",
+          "fats_100g",
+          "fats",
+          "lipids_100g",
+          "lipids",
+        ]),
+      };
+    });
+
     res.status(200).json({
-      message: "Food data retrieved from external API",
-      food: foodData,
+      message: `Found ${foodOptions.length} food options for ${name}`,
+      searchTerm: name,
+      totalResults: data.products.length,
+      foodOptions: foodOptions,
       source: "OpenFoodFacts",
     });
   } catch (error) {
@@ -102,8 +144,6 @@ export const getFoodByBarcode = async (req, res) => {
 
   try {
     const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
-    // console.log(`Searching for barcode: ${barcode}`);
-    //  console.log(`API URL: ${apiUrl}`);
 
     const response = await fetch(apiUrl);
 
@@ -114,8 +154,6 @@ export const getFoodByBarcode = async (req, res) => {
     }
 
     const data = await response.json();
-    //  console.log(`API Response status: ${data.status}`);
-    //  console.log(`Product found: ${!!data.product}`);
 
     if (!data.product || data.status === 0) {
       return res.status(404).json({
@@ -130,8 +168,6 @@ export const getFoodByBarcode = async (req, res) => {
       });
     } // Create food object from product data
     const product = data.product;
-    // console.log(`Product name: ${product.product_name}`);
-    // console.log(`Nutriments available:`, Object.keys(product.nutriments || {}));
 
     // Helper function to get nutrition value from multiple possible fields
     const getNutrientValue = (nutriments, possibleKeys) => {
@@ -181,8 +217,6 @@ export const getFoodByBarcode = async (req, res) => {
         "lipids",
       ]),
     };
-
-    // console.log(`Extracted nutrition:`, foodData);
 
     res.status(200).json({
       message: "Food data retrieved from barcode",

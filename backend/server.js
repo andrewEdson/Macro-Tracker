@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/user.route.js";
 import foodRoutes from "./routes/food.route.js";
+import mealRoutes from "./routes/meal.route.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use("/api/users", userRoutes);
 app.use("/api/foods", foodRoutes);
+app.use("/api/meals", mealRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
