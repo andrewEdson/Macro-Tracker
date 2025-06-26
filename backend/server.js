@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/user.route.js";
 import foodRoutes from "./routes/food.route.js";
 import mealRoutes from "./routes/meal.route.js";
+import dayLogRoutes from "./routes/dayLog.route.js";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/meals", mealRoutes);
+app.use("/api/daylogs", dayLogRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
