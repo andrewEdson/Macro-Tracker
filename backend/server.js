@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.route.js";
 import foodRoutes from "./routes/food.route.js";
 import mealRoutes from "./routes/meal.route.js";
 import dayLogRoutes from "./routes/dayLog.route.js";
+import chatRoutes from "./routes/chat.route.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/meals", mealRoutes);
 app.use("/api/daylogs", dayLogRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
