@@ -23,11 +23,6 @@ app.use("/api/meals", mealRoutes);
 app.use("/api/daylogs", dayLogRoutes);
 app.use("/api/chat", chatRoutes);
 
-// Basic route
-app.get("/", (req, res) => {
-  res.json({ message: "Macro Tracker API is running!" });
-});
-
 app.listen(PORT, async () => {
   console.log("Server started at http://localhost:" + PORT);
   await connectDB();
